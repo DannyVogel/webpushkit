@@ -2,7 +2,7 @@
   "name": "webpushkit",
   "private": false,
   "description": "A library for setting up web push notifications in frontend web clients.",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "type": "module",
   "repository": {
     "type": "git",

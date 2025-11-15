@@ -19,17 +19,16 @@ This guide explains how to integrate push notifications into your web applicatio
 The Push Notification Service uses the Web Push Protocol (W3C Push API) to send notifications to users' browsers. The service requires:
 
 - A **Service Worker** to handle incoming push notifications
-- **VAPID keys** for authentication
-- An **API key** or **allowed origin** for API authentication
 - A unique **device_id** to identify each subscription
+
+**Note:** VAPID keys and service endpoints are pre-configured in this package.
 
 ## Prerequisites
 
 1. **HTTPS**: Push notifications require a secure context (HTTPS or localhost)
 2. **Service Worker Support**: The browser must support Service Workers
 3. **Push API Support**: The browser must support the Push API
-4. **VAPID Public Key**: Obtain the VAPID public key from your server administrator
-5. **API Key**: Obtain your API key or ensure your origin is whitelisted
+4. **Whitelisted Origin**: Your origin must be whitelisted on the push notification service (if required)
 
 ## Getting Started
 
@@ -49,20 +48,22 @@ npx webpushkit init
 
 This will copy the service worker file (`sw.js`) to your project's `public` directory by default.
 
-### 3. Obtain Required Credentials
+### 3. Configure API Key (Optional)
 
-Contact your server administrator to obtain:
+The package comes pre-configured with the push notification service. If your app is **whitelisted**, no API key is needed. If your app requires an API key, provide it in the config:
 
-- **VAPID Public Key**: A base64-encoded public key (e.g., `BEl62iUYgUivxIkv69yViEuiBIa40HI...`)
-- **API Key**: Your API key for authentication (sent in `X-API-Key` header)
-- **Base URL**: The base URL of the push notification service (e.g., `https://api.example.com`)
+```javascript
+const pushManager = new PushNotificationManager({
+  apiKey: 'your-api-key-here' // optional, only needed if your app is not whitelisted
+});
+```
 
 ### 4. Check Browser Support (Optional)
 
 The `PushNotificationManager` automatically checks browser support when you call `initialize()`. However, if you want to check support before initializing, you can use the `isSupported()` method:
 
 ```javascript
-const pushManager = new PushNotificationManager(CONFIG);
+const pushManager = new PushNotificationManager();
 
 if (pushManager.isSupported()) {
   // Push notifications are supported
@@ -110,14 +111,13 @@ Subscribe to push notifications using the PushNotificationManager:
 ```javascript
 import { PushNotificationManager } from 'webpushkit';
 
-const CONFIG = {
-  vapidPublicKey: 'YOUR_VAPID_PUBLIC_KEY_HERE',
-  apiKey: 'YOUR_API_KEY_HERE',
-  baseUrl: 'https://api.example.com',
-  serviceWorkerPath: '/sw.js' // optional, defaults to '/sw.js'
-};
+// For whitelisted apps (no API key needed)
+const pushManager = new PushNotificationManager();
 
-const pushManager = new PushNotificationManager(CONFIG);
+// For apps that need an API key
+// const pushManager = new PushNotificationManager({
+//   apiKey: 'your-api-key-here'
+// });
 
 // Initialize and subscribe
 await pushManager.initialize();
@@ -145,15 +145,15 @@ The main class for managing push notifications.
 #### Constructor
 
 ```typescript
-new PushNotificationManager(config: PushNotificationConfig)
+new PushNotificationManager(config?: PushNotificationConfig)
 ```
 
 **Config Options:**
 
-- `vapidPublicKey` (string, required): The VAPID public key
-- `apiKey` (string, required): Your API key for authentication
-- `baseUrl` (string, required): The base URL of the push notification service
 - `serviceWorkerPath` (string, optional): Path to service worker file (defaults to `/sw.js`)
+- `apiKey` (string, optional): API key for authentication. Only required if your app is not whitelisted.
+
+**Note:** VAPID public key and base URL are pre-configured. API key is optional - whitelisted apps don't need it.
 
 #### Methods
 
@@ -225,7 +225,7 @@ Subscribe a device to push notifications.
 **Headers:**
 
 - `Content-Type: application/json`
-- `X-API-Key: <your-api-key>` (or use allowed origin)
+- `X-API-Key: <your-api-key>` (optional, only if app is not whitelisted)
 
 **Request Body:**
 
@@ -269,7 +269,7 @@ Unsubscribe one or more devices from push notifications.
 **Headers:**
 
 - `Content-Type: application/json`
-- `X-API-Key: <your-api-key>` (or use allowed origin)
+- `X-API-Key: <your-api-key>` (optional, only if app is not whitelisted)
 
 **Request Body:**
 
@@ -302,7 +302,7 @@ Send push notifications to one or more devices (typically called from your backe
 **Headers:**
 
 - `Content-Type: application/json`
-- `X-API-Key: <your-api-key>` (or use allowed origin)
+- `X-API-Key: <your-api-key>` (optional, only if app is not whitelisted)
 
 **Request Body:**
 
@@ -345,17 +345,7 @@ Here's a complete example of integrating push notifications:
 ```javascript
 import { PushNotificationManager } from 'webpushkit';
 
-const CONFIG = {
-  VAPID_PUBLIC_KEY: 'YOUR_VAPID_PUBLIC_KEY_HERE',
-  API_KEY: 'YOUR_API_KEY_HERE',
-  BASE_URL: 'https://api.example.com'
-};
-
-const pushManager = new PushNotificationManager({
-  vapidPublicKey: CONFIG.VAPID_PUBLIC_KEY,
-  apiKey: CONFIG.API_KEY,
-  baseUrl: CONFIG.BASE_URL
-});
+const pushManager = new PushNotificationManager();
 
 // Initialize and subscribe
 pushManager.initialize()
@@ -379,8 +369,8 @@ export default pushManager;
 
 ### Common Errors
 
-1. **403 Forbidden**: Invalid API key or origin not allowed
-   - Solution: Verify your API key or ensure your origin is whitelisted
+1. **403 Forbidden**: Origin not allowed
+   - Solution: Ensure your origin is whitelisted on the push notification service
 
 2. **400 Bad Request**: Invalid subscription data
    - Solution: Ensure subscription object contains valid `endpoint` and `keys`
@@ -398,7 +388,7 @@ try {
   await pushManager.subscribe();
 } catch (error) {
   if (error.message.includes('403')) {
-    console.error('Authentication failed. Check your API key.');
+    console.error('Access denied. Check if your origin is whitelisted.');
   } else if (error.message.includes('400')) {
     console.error('Invalid subscription data.');
   } else {
@@ -439,10 +429,9 @@ try {
 
 ### Subscription Fails
 
-- Verify VAPID public key is correct
-- Check API key is valid
 - Ensure request body matches expected format
 - Check network tab for detailed error messages
+- Verify your origin is whitelisted on the push notification service
 
 ### Notifications Not Appearing
 

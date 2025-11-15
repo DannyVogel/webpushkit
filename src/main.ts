@@ -8,18 +8,30 @@ import type {
 } from "./types";
 
 export class PushNotificationManager {
-  private vapidPublicKey: string;
-  private apiKey: string;
-  private baseUrl: string;
+  private vapidPublicKey =
+    "BGJZlj6wOKENtIi6pd1jLR_WWBSaOHL6N3Mk0hDbd8P3WXPEi7UHH16bkMsddxAMR1TQmovggzU82rpSkzxBsIc";
+  private baseURL = "https://the-monolith.onrender.com/pushservice";
+  private subscribeEndpoint = `${this.baseURL}/api/subscribe`;
+  private notifyEndpoint = `${this.baseURL}/api/notify`;
+  private unsubscribeEndpoint = `${this.baseURL}/api/unsubscribe`;
   private serviceWorkerPath: string;
+  private apiKey?: string;
   private deviceId: string;
 
-  constructor(config: PushNotificationConfig) {
-    this.vapidPublicKey = config.vapidPublicKey;
-    this.apiKey = config.apiKey;
-    this.baseUrl = config.baseUrl;
-    this.serviceWorkerPath = config.serviceWorkerPath || "/sw.js";
+  constructor(config?: PushNotificationConfig) {
+    this.serviceWorkerPath = config?.serviceWorkerPath || "/sw.js";
+    this.apiKey = config?.apiKey;
     this.deviceId = getOrCreateDeviceId();
+  }
+
+  private getHeaders(): HeadersInit {
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+    if (this.apiKey) {
+      headers["X-API-Key"] = this.apiKey;
+    }
+    return headers;
   }
 
   /**
@@ -159,17 +171,11 @@ export class PushNotificationManager {
         device_id: this.deviceId,
       };
 
-      const response = await fetch(
-        `${this.baseUrl}/pushservice/api/subscribe`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key": this.apiKey,
-          },
-          body: JSON.stringify(subscriptionData),
-        }
-      );
+      const response = await fetch(this.subscribeEndpoint, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify(subscriptionData),
+      });
 
       if (!response.ok) {
         throw new Error(`Subscription failed: ${response.statusText}`);
@@ -191,19 +197,13 @@ export class PushNotificationManager {
     try {
       const idsToUnsubscribe = deviceIds || [this.deviceId];
 
-      const response = await fetch(
-        `${this.baseUrl}/pushservice/api/unsubscribe`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key": this.apiKey,
-          },
-          body: JSON.stringify({
-            device_ids: idsToUnsubscribe,
-          }),
-        }
-      );
+      const response = await fetch(this.unsubscribeEndpoint, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          device_ids: idsToUnsubscribe,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`Unsubscribe failed: ${response.statusText}`);
@@ -258,12 +258,9 @@ export class PushNotificationManager {
         throw new Error("No device IDs provided");
       }
 
-      const response = await fetch(`${this.baseUrl}/pushservice/api/notify`, {
+      const response = await fetch(this.notifyEndpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": this.apiKey,
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           device_ids: deviceIds,
           payload: payload,
