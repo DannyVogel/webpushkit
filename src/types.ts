@@ -1,8 +1,6 @@
 export interface PushNotificationConfig {
-  vapidPublicKey: string;
-  apiKey: string;
-  baseUrl: string;
   serviceWorkerPath?: string;
+  apiKey?: string;
 }
 
 export interface PushNotificationPayload {
