@@ -6,7 +6,8 @@ import { fileURLToPath } from "url";
 
 const cwd = process.cwd();
 const publicDir = path.join(cwd, "public");
-const dest = path.join(publicDir, "worker.js");
+const destSw = path.join(publicDir, "sw.js");
+const destWorker = path.join(publicDir, "worker.js");
 
 // __dirname replacement for ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -21,11 +22,15 @@ if (!fs.existsSync(publicDir)) {
   console.log(`📁 Created ./public directory`);
 }
 
-// 2. Copy the service worker file
-fs.copyFileSync(src, dest);
-console.log(`✅ Copied service worker to: ./public/worker.js`);
+// 2. Copy the service worker file as sw.js (default) and worker.js (backward compatibility)
+fs.copyFileSync(src, destSw);
+console.log(`✅ Copied service worker to: ./public/sw.js`);
 
-// 3. Check if push-notifier is installed
+// Also copy as worker.js for backward compatibility
+fs.copyFileSync(src, destWorker);
+console.log(`✅ Copied service worker to: ./public/worker.js (backward compatibility)`);
+
+// 3. Check if webpushkit is installed
 const isInstalled = fs.existsSync(path.join(cwd, "node_modules", "webpushkit"));
 
 if (!isInstalled) {
@@ -40,5 +45,5 @@ if (!isInstalled) {
 
 // 4. Final message
 console.log(
-  `\n🚀 All done! Now you can import and use 'initPushNotifications()' in your frontend.\n`
+  `\n🚀 All done! Now you can import and use 'PushNotificationManager' in your frontend.\n`
 );

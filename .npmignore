@@ -1,0 +1,26 @@
+# Source files
+src/
+tsconfig.json
+vite.config.ts
+
+# Development files
+node_modules/
+*.log
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Build artifacts (keep dist, but ignore others)
+dist-ssr/
+*.local
+
+# Documentation (keep README.md)
+# README.md is included by default
+
+

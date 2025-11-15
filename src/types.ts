@@ -1,34 +1,12 @@
-export interface PushInitConfig {
+export interface PushNotificationConfig {
+  vapidPublicKey: string;
+  apiKey: string;
+  baseUrl: string;
   serviceWorkerPath?: string;
-  onPermissionDenied?: () => void;
-  onSuccess?: (subscription: PushSubscription) => void;
 }
 
-export interface PushNotificationPayload extends NotificationPayload {
+export interface PushNotificationPayload {
   title: string;
-}
-
-export interface PushNotificationsAPI {
-  subscribe: () => Promise<{
-    success: boolean;
-    error?: string;
-    subscription?: PushSubscription;
-  }>;
-  trigger: (
-    payload: PushNotificationPayload,
-    deviceIds: string[]
-  ) => Promise<{ success: boolean; error?: string }>;
-}
-
-export type NotificationDirection = "auto" | "ltr" | "rtl";
-
-export interface NotificationAction {
-  action: string;
-  title: string;
-  icon?: string;
-}
-
-export interface NotificationOptions {
   body?: string;
   icon?: string;
   badge?: string;
@@ -37,14 +15,51 @@ export interface NotificationOptions {
   requireInteraction?: boolean;
   silent?: boolean;
   renotify?: boolean;
-  actions?: NotificationAction[];
   timestamp?: number;
   vibrate?: number | number[];
   lang?: string;
-  dir?: NotificationDirection;
+  dir?: "auto" | "ltr" | "rtl";
   data?: any;
+  actions?: NotificationAction[];
 }
 
-export interface NotificationPayload extends NotificationOptions {
+export interface NotificationAction {
+  action: string;
   title: string;
+  icon?: string;
+}
+
+export interface SubscriptionData {
+  subscription: {
+    endpoint: string;
+    keys: {
+      p256dh: string;
+      auth: string;
+    };
+    expiration_time: string | null;
+    metadata: {
+      userAgent: string;
+      timestamp: string;
+    };
+  };
+  device_id: string;
+}
+
+export interface SubscribeResponse {
+  status_code: number;
+  message: string;
+  data: {
+    endpoint: string;
+    device_id: string;
+  };
+}
+
+export interface UnsubscribeResponse {
+  status_code: number;
+  message: string;
+  data: {
+    device_ids: string[];
+    removed_count: number;
+    removed_subscriptions: any[];
+  };
 }
