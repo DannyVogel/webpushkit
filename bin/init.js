@@ -12,7 +12,7 @@ const destWorker = path.join(publicDir, "worker.js");
 // __dirname replacement for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const src = path.join(__dirname, "../src/worker.js");
+const src = path.join(__dirname, "worker.js");
 
 console.log("\n🛠  Setting up service worker for webpushkit...\n");
 
