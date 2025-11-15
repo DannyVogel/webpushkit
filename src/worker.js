@@ -1,67 +1,32 @@
-function logError(message, metadata) {
-  console.error(
-    `webpushkit log: [${new Date().toLocaleString()}] ${message}`,
-    metadata
-  );
-}
-
 self.addEventListener("push", function (event) {
-  const data = event.data?.json() || {};
+  const data = event.data ? event.data.json() : {};
 
-  const handlePush = async () => {
-    try {
-      const options = {
-        body: data.body || "You have a new notification",
-        icon: data.icon ?? undefined,
-        badge: data.badge ?? undefined,
-        tag: data.tag ?? undefined,
-        requireInteraction: data.requireInteraction ?? false,
-        silent: data.silent ?? false,
-        renotify: data.renotify ?? false,
-        image: data.image ?? undefined,
-        timestamp: data.timestamp ?? undefined,
-        actions: data.actions ?? undefined,
-        vibrate: data.vibrate ?? undefined,
-        lang: data.lang ?? undefined,
-        dir: data.dir ?? undefined,
-        data,
-      };
-
-      await self.registration.showNotification(
-        data.title || "Notification",
-        options
-      );
-    } catch (error) {
-      logError("Service worker: Error displaying notification", {
-        error: error.message,
-      });
-    }
+  const options = {
+    title: data.title || "Notification",
+    body: data.body || "",
+    icon: data.icon || "/icon-192x192.png",
+    badge: data.badge || "/badge-72x72.png",
+    image: data.image,
+    tag: data.tag,
+    requireInteraction: data.requireInteraction || false,
+    silent: data.silent || false,
+    renotify: data.renotify || false,
+    timestamp: data.timestamp || Date.now(),
+    vibrate: data.vibrate,
+    lang: data.lang || "en",
+    dir: data.dir || "auto",
+    data: data.data || {},
+    actions: data.actions || [],
   };
 
-  event.waitUntil(handlePush());
+  event.waitUntil(self.registration.showNotification(options.title, options));
 });
 
 self.addEventListener("notificationclick", function (event) {
-  const handleClick = async () => {
-    try {
-      event.notification.close();
+  event.notification.close();
 
-      const url = event.notification.data?.url || "/";
-      event.waitUntil(clients.openWindow(url));
-    } catch (error) {
-      logError("Service worker: Error handling notification click", {
-        error: error.message,
-      });
-    }
-  };
+  const data = event.notification.data || {};
+  const urlToOpen = data.url || "/";
 
-  event.waitUntil(handleClick());
-});
-
-self.addEventListener("activate", (event) => {
-  event.waitUntil(clients.claim());
-});
-
-self.addEventListener("message", (event) => {
-  if (event.data === "SKIP_WAITING") self.skipWaiting();
+  event.waitUntil(clients.openWindow(urlToOpen));
 });
