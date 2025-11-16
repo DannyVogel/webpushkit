@@ -2,7 +2,7 @@
   "name": "webpushkit",
   "private": false,
   "description": "A library for setting up web push notifications in frontend web clients.",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "type": "module",
   "repository": {
     "type": "git",
@@ -29,7 +29,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && tsc && cp src/worker.js bin/worker.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "typescript": "~5.8.3",

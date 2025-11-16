@@ -30,4 +30,3 @@ self.addEventListener("notificationclick", function (event) {
 
   event.waitUntil(clients.openWindow(urlToOpen));
 });
-
