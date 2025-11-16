@@ -479,6 +479,31 @@ try {
 - Re-subscribe before expiration
 - Handle expiration gracefully in your UI
 
+### Production Considerations with PWAs and Netlify
+
+When using this package in a PWA project (e.g., with `vite-plugin-pwa`) and deploying to Netlify, there are a few important considerations:
+
+1. **Custom Service Worker with PWA Plugin**  
+   - Some PWA plugins (like VitePWA) generate their own service worker by default.  
+   - To ensure your push notification code remains in the service worker, use the `injectManifest` strategy.  
+   - Your service worker (`sw.js`) should include `precacheAndRoute(self.__WB_MANIFEST || [])` so the plugin can inject asset precaching without overwriting your push logic.
+
+2. **Netlify Rewrites**  
+   - Netlify’s SPA redirect rules can rewrite `/sw.js` requests to `index.html`.  
+   - To prevent this, include a `_redirects` file in `public/`:
+
+     ```
+     /sw.js  /sw.js  200
+     ```
+
+   - This ensures the service worker is served correctly and push notifications work in production.
+
+3. **Verification**  
+   - After deployment, confirm that visiting `/sw.js` shows your service worker code (not HTML).  
+   - Unregister old service workers in DevTools and refresh to ensure the new one with push logic is active.
+
+Following these steps ensures that push notifications function correctly in a PWA deployed to Netlify while retaining offline caching and manifest features.
+
 ## Additional Resources
 
 - [Web Push Protocol](https://datatracker.ietf.org/doc/html/rfc8030)
