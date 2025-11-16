@@ -46,65 +46,49 @@ After installation, run the setup command to initialize the service worker:
 npx webpushkit init
 ```
 
-This will copy the service worker file (`sw.js`) to your project's `public` directory by default.
+This will:
+- Create a `public` directory if it doesn't exist
+- Copy the service worker file as `sw.js` to your project's `public` directory (default path)
+- Also copy it as `worker.js` for backward compatibility
 
-### 3. Configure API Key (Optional)
+### 3. Configure Options (Optional)
 
-The package comes pre-configured with the push notification service. If your app is **whitelisted**, no API key is needed. If your app requires an API key, provide it in the config:
+The package comes pre-configured with the push notification service. Configure it based on your needs:
 
 ```javascript
+// For whitelisted apps (no API key needed)
+const pushManager = new PushNotificationManager();
+
+// For apps that need an API key
 const pushManager = new PushNotificationManager({
   apiKey: 'your-api-key-here' // optional, only needed if your app is not whitelisted
 });
+
+// For development environment
+const pushManager = new PushNotificationManager({
+  environment: 'dev' // uses http://localhost:3000/pushservice
+});
+
+// For custom base URL
+const pushManager = new PushNotificationManager({
+  baseURL: 'https://your-custom-url.com/pushservice'
+});
+
+// Custom service worker path (defaults to /sw.js)
+const pushManager = new PushNotificationManager({
+  serviceWorkerPath: '/custom-sw.js'
+});
 ```
-
-### 4. Check Browser Support (Optional)
-
-The `PushNotificationManager` automatically checks browser support when you call `initialize()`. However, if you want to check support before initializing, you can use the `isSupported()` method:
-
-```javascript
-const pushManager = new PushNotificationManager();
-
-if (pushManager.isSupported()) {
-  // Push notifications are supported
-  await pushManager.initialize();
-} else {
-  // Push notifications are not supported
-  console.warn('Push notifications are not supported in this browser');
-}
-```
-
-Note: The `initialize()` method will automatically return `false` if push notifications are not supported, so this check is optional.
 
 ## Step-by-Step Setup
 
-### Step 1: Register a Service Worker
+### Step 1: Register a Service Worker and Request Permission
 
 The service worker file (`sw.js`) is automatically copied to your `public` directory when you run `npx webpushkit init`. The service worker handles incoming push notifications and notification clicks.
 
-### Step 2: Request Notification Permission
+**Note:** The `initialize()` method automatically registers the service worker and requests notification permission. You don't need to handle these steps manually.
 
-Request permission from the user to show notifications:
-
-```javascript
-async function requestNotificationPermission() {
-  if (!('Notification' in window)) {
-    console.warn('This browser does not support notifications');
-    return false;
-  }
-  if (Notification.permission === 'granted') {
-    return true;
-  }
-  if (Notification.permission === 'denied') {
-    console.warn('Notification permission has been denied');
-    return false;
-  }
-  const permission = await Notification.requestPermission();
-  return permission === 'granted';
-}
-```
-
-### Step 3: Subscribe to Push Notifications
+### Step 2: Subscribe to Push Notifications
 
 Subscribe to push notifications using the PushNotificationManager:
 
@@ -119,16 +103,19 @@ const pushManager = new PushNotificationManager();
 //   apiKey: 'your-api-key-here'
 // });
 
+// For development environment
+// const pushManager = new PushNotificationManager({
+//   environment: 'dev'
+// });
+
 // Initialize and subscribe
 await pushManager.initialize();
 await pushManager.subscribe();
 ```
 
-### Step 4: Generate a Unique Device ID
+**Note:** The `PushNotificationManager` automatically generates and stores a unique device ID in localStorage when needed. You don't need to handle this manually.
 
-The `PushNotificationManager` automatically generates and stores a unique device ID in localStorage. You don't need to handle this manually.
-
-### Step 5: Unsubscribe from Push Notifications
+### Step 3: Unsubscribe from Push Notifications
 
 To unsubscribe, call the unsubscribe method:
 
@@ -152,8 +139,10 @@ new PushNotificationManager(config?: PushNotificationConfig)
 
 - `serviceWorkerPath` (string, optional): Path to service worker file (defaults to `/sw.js`)
 - `apiKey` (string, optional): API key for authentication. Only required if your app is not whitelisted.
+- `environment` ("dev" | "prod", optional): Sets the base URL automatically. If `"dev"`, uses `http://localhost:3000/pushservice`. If `"prod"` or not specified, uses `https://the-monolith.onrender.com/pushservice`.
+- `baseURL` (string, optional): Custom base URL for the push service. If provided, overrides the `environment` setting. Should include the `/pushservice` path.
 
-**Note:** VAPID public key and base URL are pre-configured. API key is optional - whitelisted apps don't need it.
+**Note:** VAPID public key is pre-configured. Base URL defaults to production (`https://the-monolith.onrender.com/pushservice`) unless `environment: "dev"` or a custom `baseURL` is provided. API key is optional - whitelisted apps don't need it.
 
 #### Methods
 
@@ -192,7 +181,9 @@ Subscribes to push notifications and sends the subscription to the server.
 
 ##### `unsubscribe(deviceIds?: string[]): Promise<UnsubscribeResponse>`
 
-Unsubscribes from push notifications. If no device IDs are provided, unsubscribes the current device.
+Unsubscribes from push notifications. If no device IDs are provided, unsubscribes the current device. When unsubscribing the current device (or if the current device ID is included in the provided array), this method also:
+- Unsubscribes from the browser's PushManager
+- Removes the device ID from localStorage
 
 **Returns:**
 
@@ -212,13 +203,47 @@ Unsubscribes from push notifications. If no device IDs are provided, unsubscribe
 
 Checks if currently subscribed to push notifications.
 
+##### `getOrCreateDeviceId(): string`
+
+Gets or creates a unique device ID stored in localStorage. Returns the existing device ID if present, otherwise generates and stores a new one.
+
+##### `generateUUID(): string`
+
+Generates a UUID v4 string. Uses `crypto.randomUUID()` if available, otherwise falls back to a polyfill.
+
 ##### `notify(deviceIds: string[], payload: PushNotificationPayload): Promise<{success: boolean; error?: string}>`
 
 Sends push notifications to one or more devices. Typically called from your backend, but provided for convenience.
 
+### Exported Functions
+
+The package also exports standalone utility functions:
+
+#### `getOrCreateDeviceId(): string`
+
+Gets or creates a unique device ID stored in localStorage. Can be imported and used independently:
+
+```typescript
+import { getOrCreateDeviceId } from 'webpushkit';
+
+const deviceId = getOrCreateDeviceId();
+```
+
+#### `generateUUID(): string`
+
+Generates a UUID v4 string. Can be imported and used independently:
+
+```typescript
+import { generateUUID } from 'webpushkit';
+
+const uuid = generateUUID();
+```
+
 ### Subscribe Endpoint
 
-**POST** `/pushservice/api/subscribe`
+**POST** `{baseURL}/api/subscribe`
+
+Where `baseURL` defaults to `https://the-monolith.onrender.com/pushservice` (production) or `http://localhost:3000/pushservice` (development), or can be customized via config.
 
 Subscribe a device to push notifications.
 
@@ -262,7 +287,9 @@ Subscribe a device to push notifications.
 
 ### Unsubscribe Endpoint
 
-**POST** `/pushservice/api/unsubscribe`
+**POST** `{baseURL}/api/unsubscribe`
+
+Where `baseURL` defaults to `https://the-monolith.onrender.com/pushservice` (production) or `http://localhost:3000/pushservice` (development), or can be customized via config.
 
 Unsubscribe one or more devices from push notifications.
 
@@ -295,7 +322,9 @@ Unsubscribe one or more devices from push notifications.
 
 ### Notify Endpoint
 
-**POST** `/pushservice/api/notify`
+**POST** `{baseURL}/api/notify`
+
+Where `baseURL` defaults to `https://the-monolith.onrender.com/pushservice` (production) or `http://localhost:3000/pushservice` (development), or can be customized via config.
 
 Send push notifications to one or more devices (typically called from your backend).
 
@@ -345,7 +374,11 @@ Here's a complete example of integrating push notifications:
 ```javascript
 import { PushNotificationManager } from 'webpushkit';
 
-const pushManager = new PushNotificationManager();
+// Configure for your environment
+const pushManager = new PushNotificationManager({
+  // apiKey: 'your-api-key-here', // optional
+  // environment: 'dev', // optional, for development
+});
 
 // Initialize and subscribe
 pushManager.initialize()
