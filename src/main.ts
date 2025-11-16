@@ -43,7 +43,7 @@ export class PushNotificationManager {
       "Content-Type": "application/json",
     };
     if (this.apiKey) {
-      headers["X-API-Key"] = this.apiKey;
+      headers["x-api-key"] = this.apiKey;
     }
     return headers;
   }
