@@ -250,7 +250,7 @@ Subscribe a device to push notifications.
 **Headers:**
 
 - `Content-Type: application/json`
-- `X-API-Key: <your-api-key>` (optional, only if app is not whitelisted)
+- `x-api-key: <your-api-key>` (optional, only if app is not whitelisted)
 
 **Request Body:**
 
@@ -296,7 +296,7 @@ Unsubscribe one or more devices from push notifications.
 **Headers:**
 
 - `Content-Type: application/json`
-- `X-API-Key: <your-api-key>` (optional, only if app is not whitelisted)
+- `x-api-key: <your-api-key>` (optional, only if app is not whitelisted)
 
 **Request Body:**
 
@@ -331,7 +331,7 @@ Send push notifications to one or more devices (typically called from your backe
 **Headers:**
 
 - `Content-Type: application/json`
-- `X-API-Key: <your-api-key>` (optional, only if app is not whitelisted)
+- `x-api-key: <your-api-key>` (optional, only if app is not whitelisted)
 
 **Request Body:**
 
