@@ -1,6 +1,8 @@
 export interface PushNotificationConfig {
   serviceWorkerPath?: string;
   apiKey?: string;
+  environment?: "dev" | "prod";
+  baseURL?: string;
 }
 
 export interface PushNotificationPayload {

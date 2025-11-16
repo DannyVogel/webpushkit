@@ -10,10 +10,10 @@ import type {
 export class PushNotificationManager {
   private vapidPublicKey =
     "BGJZlj6wOKENtIi6pd1jLR_WWBSaOHL6N3Mk0hDbd8P3WXPEi7UHH16bkMsddxAMR1TQmovggzU82rpSkzxBsIc";
-  private baseURL = "https://the-monolith.onrender.com/pushservice";
-  private subscribeEndpoint = `${this.baseURL}/api/subscribe`;
-  private notifyEndpoint = `${this.baseURL}/api/notify`;
-  private unsubscribeEndpoint = `${this.baseURL}/api/unsubscribe`;
+  private baseURL: string;
+  private subscribeEndpoint: string;
+  private notifyEndpoint: string;
+  private unsubscribeEndpoint: string;
   private serviceWorkerPath: string;
   private apiKey?: string;
   private deviceId: string;
@@ -22,6 +22,20 @@ export class PushNotificationManager {
     this.serviceWorkerPath = config?.serviceWorkerPath || "/sw.js";
     this.apiKey = config?.apiKey;
     this.deviceId = getOrCreateDeviceId();
+    
+    // Determine base URL based on config
+    if (config?.baseURL) {
+      this.baseURL = config.baseURL;
+    } else if (config?.environment === "dev") {
+      this.baseURL = "http://localhost:3000/pushservice";
+    } else {
+      this.baseURL = "https://the-monolith.onrender.com/pushservice";
+    }
+    
+    // Set endpoints based on base URL
+    this.subscribeEndpoint = `${this.baseURL}/api/subscribe`;
+    this.notifyEndpoint = `${this.baseURL}/api/notify`;
+    this.unsubscribeEndpoint = `${this.baseURL}/api/unsubscribe`;
   }
 
   private getHeaders(): HeadersInit {
