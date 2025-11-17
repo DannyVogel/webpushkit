@@ -66,12 +66,12 @@ const pushManager = new PushNotificationManager({
 
 // For development environment
 const pushManager = new PushNotificationManager({
-  environment: 'dev' // uses http://localhost:3000/pushservice
+  environment: 'dev' // uses http://localhost:3000/pusher
 });
 
 // For custom base URL
 const pushManager = new PushNotificationManager({
-  baseURL: 'https://your-custom-url.com/pushservice'
+  baseURL: 'https://your-custom-url.com/pusher'
 });
 
 // Custom service worker path (defaults to /sw.js)
@@ -139,10 +139,10 @@ new PushNotificationManager(config?: PushNotificationConfig)
 
 - `serviceWorkerPath` (string, optional): Path to service worker file (defaults to `/sw.js`)
 - `apiKey` (string, optional): API key for authentication. Only required if your app is not whitelisted.
-- `environment` ("dev" | "prod", optional): Sets the base URL automatically. If `"dev"`, uses `http://localhost:3000/pushservice`. If `"prod"` or not specified, uses `https://the-monolith.onrender.com/pushservice`.
-- `baseURL` (string, optional): Custom base URL for the push service. If provided, overrides the `environment` setting. Should include the `/pushservice` path.
+- `environment` ("dev" | "prod", optional): Sets the base URL automatically. If `"dev"`, uses `http://localhost:3000/pusher`. If `"prod"` or not specified, uses `https://the-monolith.onrender.com/pusher`.
+- `baseURL` (string, optional): Custom base URL for the push service. If provided, overrides the `environment` setting. Should include the `/pusher` path.
 
-**Note:** VAPID public key is pre-configured. Base URL defaults to production (`https://the-monolith.onrender.com/pushservice`) unless `environment: "dev"` or a custom `baseURL` is provided. API key is optional - whitelisted apps don't need it.
+**Note:** VAPID public key is pre-configured. Base URL defaults to production (`https://the-monolith.onrender.com/pusher`) unless `environment: "dev"` or a custom `baseURL` is provided. API key is optional - whitelisted apps don't need it.
 
 #### Methods
 
@@ -241,9 +241,9 @@ const uuid = generateUUID();
 
 ### Subscribe Endpoint
 
-**POST** `{baseURL}/api/subscribe`
+**POST** `{baseURL}/subscribe`
 
-Where `baseURL` defaults to `https://the-monolith.onrender.com/pushservice` (production) or `http://localhost:3000/pushservice` (development), or can be customized via config.
+Where `baseURL` defaults to `https://the-monolith.onrender.com/pusher` (production) or `http://localhost:3000/pusher` (development), or can be customized via config.
 
 Subscribe a device to push notifications.
 
@@ -287,9 +287,9 @@ Subscribe a device to push notifications.
 
 ### Unsubscribe Endpoint
 
-**POST** `{baseURL}/api/unsubscribe`
+**POST** `{baseURL}/unsubscribe`
 
-Where `baseURL` defaults to `https://the-monolith.onrender.com/pushservice` (production) or `http://localhost:3000/pushservice` (development), or can be customized via config.
+Where `baseURL` defaults to `https://the-monolith.onrender.com/pusher` (production) or `http://localhost:3000/pusher` (development), or can be customized via config.
 
 Unsubscribe one or more devices from push notifications.
 
@@ -322,9 +322,9 @@ Unsubscribe one or more devices from push notifications.
 
 ### Notify Endpoint
 
-**POST** `{baseURL}/api/notify`
+**POST** `{baseURL}/notify`
 
-Where `baseURL` defaults to `https://the-monolith.onrender.com/pushservice` (production) or `http://localhost:3000/pushservice` (development), or can be customized via config.
+Where `baseURL` defaults to `https://the-monolith.onrender.com/pusher` (production) or `http://localhost:3000/pusher` (development), or can be customized via config.
 
 Send push notifications to one or more devices (typically called from your backend).
 
@@ -507,6 +507,6 @@ Following these steps ensures that push notifications function correctly in a PW
 ## Additional Resources
 
 - [Web Push Protocol](https://datatracker.ietf.org/doc/html/rfc8030)
-- [Push API MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
-- [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
-- [Notification API](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API)
+- [Push API MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/Push_API)
+- [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/Service_Worker_API)
+- [Notification API](https://developer.mozilla.org/en-US/docs/Web/Notifications_API)

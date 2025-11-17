@@ -27,15 +27,15 @@ export class PushNotificationManager {
     if (config?.baseURL) {
       this.baseURL = config.baseURL;
     } else if (config?.environment === "dev") {
-      this.baseURL = "http://localhost:3000/pushservice";
+      this.baseURL = "http://localhost:3000/pusher";
     } else {
-      this.baseURL = "https://the-monolith.onrender.com/pushservice";
+      this.baseURL = "https://the-monolith.onrender.com/pusher";
     }
     
     // Set endpoints based on base URL
-    this.subscribeEndpoint = `${this.baseURL}/api/subscribe`;
-    this.notifyEndpoint = `${this.baseURL}/api/notify`;
-    this.unsubscribeEndpoint = `${this.baseURL}/api/unsubscribe`;
+    this.subscribeEndpoint = `${this.baseURL}/subscribe`;
+    this.notifyEndpoint = `${this.baseURL}/notify`;
+    this.unsubscribeEndpoint = `${this.baseURL}/unsubscribe`;
   }
 
   private getHeaders(): HeadersInit {
