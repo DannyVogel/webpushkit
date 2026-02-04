@@ -7,12 +7,13 @@ A lightweight client library for Web Push Notifications. Simplifies service work
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
 3. [Getting Started](#getting-started)
-4. [Configuration](#configuration)
-5. [API Reference](#api-reference)
-6. [Example Implementation](#example-implementation)
-7. [Error Handling](#error-handling)
-8. [Best Practices](#best-practices)
-9. [Backend Setup](#backend-setup)
+4. [Test App](#test-app)
+5. [Configuration](#configuration)
+6. [API Reference](#api-reference)
+7. [Example Implementation](#example-implementation)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Backend Setup](#backend-setup)
 
 ## Overview
 
@@ -69,6 +70,21 @@ if (initialized) {
   console.log('Subscribed with device ID:', result.data.device_id);
 }
 ```
+
+## Test App
+
+Want to try webpushkit before integrating it? The repository includes a test app with a browser-based UI for testing push notifications.
+
+```bash
+git clone https://github.com/DannyVogel/webpushkit.git
+cd webpushkit
+npm install
+npm run dev
+```
+
+Then open `http://localhost:5173/test-app/` in your browser.
+
+See [test-app/README.md](test-app/README.md) for detailed usage instructions.
 
 ## Configuration
 

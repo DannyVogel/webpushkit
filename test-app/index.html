@@ -233,7 +233,7 @@
         throw new Error('Backend URL is required');
       }
 
-      const config = { vapidPublicKey: vapidKey, baseURL };
+      const config = { vapidPublicKey: vapidKey, baseURL, serviceWorkerPath: '/src/worker.js' };
       if (apiKey) config.apiKey = apiKey;
       return config;
     }

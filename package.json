@@ -4,6 +4,10 @@
   "description": "A library for setting up web push notifications in frontend web clients.",
   "version": "0.1.13",
   "type": "module",
+  "files": [
+    "dist",
+    "bin"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/DannyVogel/webpushkit"
