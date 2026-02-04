@@ -1,8 +1,21 @@
 export interface PushNotificationConfig {
+  /**
+   * Your VAPID public key from your backend server.
+   * Generate with: npx web-push generate-vapid-keys
+   */
+  vapidPublicKey: string;
+  /**
+   * Base URL of your push notification server (e.g., "https://api.example.com/pusher")
+   */
+  baseURL: string;
+  /**
+   * Path to your service worker file (defaults to "/sw.js")
+   */
   serviceWorkerPath?: string;
+  /**
+   * API key for authentication (if your backend requires it)
+   */
   apiKey?: string;
-  environment?: "dev" | "prod";
-  baseURL?: string;
 }
 
 export interface PushNotificationPayload {
@@ -61,5 +74,24 @@ export interface UnsubscribeResponse {
     device_ids: string[];
     removed_count: number;
     removed_subscriptions: any[];
+  };
+}
+
+export interface NotifyResult {
+  device_id: string;
+  success: boolean;
+  error?: string;
+}
+
+export interface NotifyResponse {
+  status_code: number;
+  message: string;
+  data: {
+    results: NotifyResult[];
+    summary: {
+      total: number;
+      successful: number;
+      failed: number;
+    };
   };
 }

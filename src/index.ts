@@ -6,5 +6,7 @@ export type {
   SubscriptionData,
   SubscribeResponse,
   UnsubscribeResponse,
+  NotifyResult,
+  NotifyResponse,
 } from "./types";
 export { getOrCreateDeviceId, generateUUID } from "./deviceId";

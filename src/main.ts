@@ -5,11 +5,11 @@ import type {
   SubscriptionData,
   SubscribeResponse,
   UnsubscribeResponse,
+  NotifyResponse,
 } from "./types";
 
 export class PushNotificationManager {
-  private vapidPublicKey =
-    "BGJZlj6wOKENtIi6pd1jLR_WWBSaOHL6N3Mk0hDbd8P3WXPEi7UHH16bkMsddxAMR1TQmovggzU82rpSkzxBsIc";
+  private vapidPublicKey: string;
   private baseURL: string;
   private subscribeEndpoint: string;
   private notifyEndpoint: string;
@@ -18,20 +18,20 @@ export class PushNotificationManager {
   private apiKey?: string;
   private deviceId: string;
 
-  constructor(config?: PushNotificationConfig) {
-    this.serviceWorkerPath = config?.serviceWorkerPath || "/sw.js";
-    this.apiKey = config?.apiKey;
-    this.deviceId = getOrCreateDeviceId();
-    
-    // Determine base URL based on config
-    if (config?.baseURL) {
-      this.baseURL = config.baseURL;
-    } else if (config?.environment === "dev") {
-      this.baseURL = "http://localhost:3000/pusher";
-    } else {
-      this.baseURL = "https://the-monolith.onrender.com/pusher";
+  constructor(config: PushNotificationConfig) {
+    if (!config.vapidPublicKey) {
+      throw new Error("vapidPublicKey is required. Get it from your backend server.");
     }
-    
+    if (!config.baseURL) {
+      throw new Error("baseURL is required. Provide your push notification server URL.");
+    }
+
+    this.vapidPublicKey = config.vapidPublicKey;
+    this.baseURL = config.baseURL.replace(/\/$/, ""); // Remove trailing slash
+    this.serviceWorkerPath = config.serviceWorkerPath || "/sw.js";
+    this.apiKey = config.apiKey;
+    this.deviceId = getOrCreateDeviceId();
+
     // Set endpoints based on base URL
     this.subscribeEndpoint = `${this.baseURL}/subscribe`;
     this.notifyEndpoint = `${this.baseURL}/notify`;
@@ -266,32 +266,26 @@ export class PushNotificationManager {
   async notify(
     deviceIds: string[],
     payload: PushNotificationPayload
-  ): Promise<{ success: boolean; error?: string }> {
-    try {
-      if (deviceIds.length === 0) {
-        throw new Error("No device IDs provided");
-      }
-
-      const response = await fetch(this.notifyEndpoint, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({
-          device_ids: deviceIds,
-          payload: payload,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Notification failed: ${response.statusText}`);
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error("Error sending notification:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
+  ): Promise<NotifyResponse> {
+    if (deviceIds.length === 0) {
+      throw new Error("No device IDs provided");
     }
+
+    const response = await fetch(this.notifyEndpoint, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        device_ids: deviceIds,
+        payload: payload,
+      }),
+    });
+
+    // Handle 200 (all success), 207 (partial success), and errors
+    if (!response.ok && response.status !== 207) {
+      throw new Error(`Notification failed: ${response.statusText}`);
+    }
+
+    const result: NotifyResponse = await response.json();
+    return result;
   }
 }
